@@ -10,45 +10,45 @@ import java.util.Map;
 @Service
 public class EmployeeService {
 
-    private static final int SIZE = 10;
-    private final Map<String, Employee> employees;
+    private static final int LIMIT = 10;
+    private final Map<String, Employee> employees = new HashMap<>();
 
-    public EmployeeService() {
-        this.employees = new HashMap<>();
+    private String getKey(String name, String surName) {
+        return name + "|" + surName;
     }
 
-
-    public Employee add(String firstName, String lastName) {
-        Employee employee = new Employee(firstName, lastName);
-        if (employees.containsKey(employee.getFullName())) {
+    public Employee add(String name, String surName, int department, double salary) {
+        Employee employee = new Employee(name, surName, department, salary);
+        String key = getKey(name, surName);
+        if (employees.containsKey(key)) {
             throw new EmployeeAlreadyAddedException();
         }
-        if (employees.size() >= SIZE) {
-            throw new EmployeeStorageIsFullException();
-        }
-        employees.put(employee.getFullName(), employee);
-        return employee;
-    }
-
-    public Employee remove(String firstName, String lastName) {
-        Employee employee = new Employee(firstName, lastName);
-        if (employees.containsKey(employee.getFullName())) {
-            employees.remove(employee.getFullName());
+        if (employees.size() < LIMIT) {
+            employees.put(key, employee);
             return employee;
         }
-        throw new EmployeeNotFoundException();
+        throw new EmployeeStorageIsFullException();
     }
 
-
-    public Employee find(String firstName, String lastName) {
-        Employee employee = new Employee(firstName, lastName);
-        if (employees.containsKey(employee.getFullName())) {
-            return employee;
+    public Employee remove(String name, String surName) {
+        String key = getKey(name, surName);
+        if (!employees.containsKey(key)) {
+            throw new EmployeeNotFoundException();
         }
-        throw new EmployeeNotFoundException();
+        return employees.remove(key);
     }
 
-    public List<Employee> findAll() {
+
+    public Employee find(String name, String surName) {
+        String key = getKey(name, surName);
+        if (!employees.containsKey(key)) {
+            throw new EmployeeNotFoundException();
+        }
+        return employees.get(key);
+    }
+
+    public List<Employee> getAll() {
         return new ArrayList<>(employees.values());
     }
+
 }
